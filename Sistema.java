@@ -361,6 +361,29 @@ public class Sistema {
 	// -------------------------------------------------------------------------------------------------------
 	// ------------------- S O F T W A R E - inicio ----------------------------------------------------------
 
+    // ------------------- G E R E N T E  M E M O R I A - inicio
+    public class GM {
+        int memory_size;
+        int frame_size;
+        boolean frame_free[];
+
+        public GM(int memory_size, int frame_size) {
+            this.memory_size = memory_size;
+            this.frame_size = frame_size;
+
+            int num_frames = memory_size / frame_size;
+            frame_free = new boolean[num_frames];
+            
+            for (int i = 0; i < num_frames; i++) {
+                frame_free[i] = true;    // todos os frames estao livres
+            }
+        }
+        
+    }
+
+    // ------------------- G E R E N T E  M E M O R I A - fim
+
+    
 	// ------------------- I N T E R R U P C O E S  - rotinas de tratamento ----------------------------------
     public class InterruptHandling {
             public void handle(Interrupts irpt, int pc) {   // apenas avisa - todas interrupcoes neste momento finalizam o programa
