@@ -364,26 +364,57 @@ public class Sistema {
     // ------------------- G E R E N T E  M E M O R I A - inicio
     public class GM {
         int memory_size;
-        int frame_size;
-        boolean frame_free[];
+        int partition_size;
+        boolean partition_free[];
 
-        public GM(int memory_size, int frame_size) {
+        public GM(int memory_size, int partition_size) { // construtor
             this.memory_size = memory_size;
-            this.frame_size = frame_size;
+            this.partition_size = partition_size;
 
-            int num_frames = memory_size / frame_size;
-            frame_free = new boolean[num_frames];
+            int num_partition = memory_size / partition_size;
+            partition_free = new boolean[num_partition]; 
             
-            for (int i = 0; i < num_frames; i++) {
-                frame_free[i] = true;    // todos os frames estao livres
+            for (int i = 0; i < num_partition; i++) { // inicializa todas as particoes como livres
+                partition_free[i] = true;
             }
         }
         
+        public boolean alloc(int size){ // aloca uma particao de memoria
+            int first_partition = -1;      
+            int num_partition_free = 0;
+            int num_partition = size / partition_size; // numero de particoes necessarias para alocar o processo
+            
+            if (size % partition_size != 0) { 
+                num_partition++;            // Verifica se o numero de particoes eh inteiro
+            }
+            
+            // Verifica se ha particoes livres
+            for (int i = 0; i < partition_free.length; i++) { 
+                if (partition_free[i]) {   // Se a particao estiver livre, verifica se é a primeira particao livre
+                    if (first_partition == -1) { 
+                        first_partition = i;     // Salva a primeira particao livre
+                    }
+                    num_partition_free++;       // Incrementa o numero de particoes livres
+                } else {                       // Se a particao nao estiver livre
+                    first_partition = -1;      
+                }
+                
+                if (num_partition_free == num_partition) { // Se o numero de particoes livres for igual ao numero de particoes necessarias
+                    for (int j = first_partition; j < first_partition + num_partition; j++) { // Percorre as particoes necessarias
+                        partition_free[j] = false; // Marca as particoes como ocupadas
+                    }
+                    return true; 
+                }
+            }
+            return false;
+        }
+
     }
+    
 
     // ------------------- G E R E N T E  M E M O R I A - fim
 
-    
+
 	// ------------------- I N T E R R U P C O E S  - rotinas de tratamento ----------------------------------
     public class InterruptHandling {
             public void handle(Interrupts irpt, int pc) {   // apenas avisa - todas interrupcoes neste momento finalizam o programa
