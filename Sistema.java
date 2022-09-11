@@ -409,9 +409,12 @@ public class Sistema {
             return false;
         }
 
+        // Libera uma particao de memoria
+        public void dealloc(int address) { 
+            int partition = address / partition_size; // Calcula a particao que sera liberada
+            partition_free[partition] = true;         // Marca a particao como livre
+        }
     }
-    
-
     // ------------------- G E R E N T E  M E M O R I A - fim
 
 
