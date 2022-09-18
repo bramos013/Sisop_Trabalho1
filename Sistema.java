@@ -2,7 +2,7 @@
 // Prof. Fernando Dotti
 // Código fornecido como parte da solução do projeto de Sistemas Operacionais
 //
-// VM
+// 	  VM
 //    HW = memória, cpu
 //    SW = tratamento int e chamada de sistema
 // Funcionalidades de carga, execução e dump de memória
@@ -326,9 +326,7 @@ public class Sistema {
 		}      
 	}
     // ------------------ C P U - fim ------------------------------------------------------------------------
-	// -------------------------------------------------------------------------------------------------------
-
-    
+	// -------------------------------------------------------------------------------------------------------   
 	
     // ------------------- V M  - constituida de CPU e MEMORIA -----------------------------------------------
     // -------------------------- atributos e construcao da VM -----------------------------------------------
@@ -362,61 +360,55 @@ public class Sistema {
 	// ------------------- S O F T W A R E - inicio ----------------------------------------------------------
 
     // ------------------- G E R E N T E  M E M O R I A - inicio
+
     public class GM {
         int memory_size;
         int partition_size;
-        boolean partition_free[];
+        boolean partition_free_list[];	//lista de partições livres de alocação
 
+		// PRONTO
         public GM(int memory_size, int partition_size) { // construtor
-            this.memory_size = memory_size;
-            this.partition_size = partition_size;
+            this.memory_size = memory_size;	//tamanho da memória
+            this.partition_size = partition_size; //tamanho da partição
 
-            int num_partition = memory_size / partition_size;
-            partition_free = new boolean[num_partition]; 
+            int num_partition = memory_size / partition_size;	//quantidade de partições é = ao tamanho da memória dividido pelo tamanho da partição
+            partition_free_list = new boolean[num_partition]; // vetor de particoes livres
             
             for (int i = 0; i < num_partition; i++) { // inicializa todas as particoes como livres
-                partition_free[i] = true;
+                partition_free_list[i] = true;
             }
-        }
-        
-        public boolean alloc(int size){ // aloca uma particao de memoria
-            int first_partition = -1;      
-            int num_partition_free = 0;
-            int num_partition = size / partition_size; // numero de particoes necessarias para alocar o processo
-            
-            if (size % partition_size != 0) { 
-                num_partition++;            // Verifica se o numero de particoes eh inteiro
-            }
-            
-            // Verifica se ha particoes livres
-            for (int i = 0; i < partition_free.length; i++) { 
-                if (partition_free[i]) {   // Se a particao estiver livre, verifica se é a primeira particao livre
-                    if (first_partition == -1) { 
-                        first_partition = i;     // Salva a primeira particao livre
-                    }
-                    num_partition_free++;       // Incrementa o numero de particoes livres
-                } else {                       // Se a particao nao estiver livre
-                    first_partition = -1;      
-                }
-                
-                if (num_partition_free == num_partition) { // Se o numero de particoes livres for igual ao numero de particoes necessarias
-                    for (int j = first_partition; j < first_partition + num_partition; j++) { // Percorre as particoes necessarias
-                        partition_free[j] = false; // Marca as particoes como ocupadas
-                    }
-                    return true; 
-                }
-            }
-            return false;
         }
 
-        // Libera uma particao de memoria
-        public void dealloc(int address) { 
-            int partition = address / partition_size; // Calcula a particao que sera liberada
-            partition_free[partition] = true;         // Marca a particao como livre
+		// DOING
+        public boolean alloc(int program_size){ // aloca uma particao de memoria   
+            int num_partition_free = 0;
+            int required_partition = program_size / partition_size; // numero de particoes necessarias para alocar o processo
+            
+			int offset = program_size % this.partition_size;
+			if (offset > 0) // se houver divisao quebrada, necessita mais uma partição
+				required_partition++; 
+            
+			for (boolean partition_free : partition_free_list) { // calculando frames livres
+				if (partition_free == true)
+					num_partition_free++;
+			}
+		
+			if(required_partition <= num_partition_free){ // se houver particoes livres suficientes
+				while(required_partition >= 0){ // enquanto houver particoes necessarias
+					for(int i = 0; i < partition_free_list.length; i++){ // percorre a lista de particoes livres
+						if(partition_free_list[i] == true){ // se a particao estiver livre
+							partition_free_list[i] = false; // alocando particao
+							required_partition--; // decrementa particoes necessarias
+							break; // sai do for
+						}				
+					}
+				}
+				return true; // alocou
+			}
+            return false; // nao alocou
         }
     }
     // ------------------- G E R E N T E  M E M O R I A - fim
-
 
 	// ------------------- I N T E R R U P C O E S  - rotinas de tratamento ----------------------------------
     public class InterruptHandling {
